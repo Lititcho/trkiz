@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تركيز</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="w">
+  <div class="row" style="margin:4px 4px 14px"><h1>🎯 تركيز</h1><span class="mut">ركّز، ذاكر، أنجز.</span></div>
+  <div id="bar" class="card row"></div>
+  <div id="empty" class="card" style="text-align:center;padding:50px" hidden><div style="font-size:48px">📚</div><h3>أضف مادتك الأولى من الشريط أعلاه</h3><p class="mut">كل مادة لها فيديوهاتها ومؤقتها وملفاتها المستقلة (حتى 4 مواد).</p></div>
+  <div id="work" hidden>
+    <div class="mut">📚 جلسة الدراسة</div><h2 id="sn"></h2>
+    <div class="card row" id="tcard">
+      <span class="big" id="tt">25:00</span>
+      <button class="chip" data-pre="15">15د</button><button class="chip" data-pre="25">25د</button><button class="chip" data-pre="45">45د</button><button class="chip" data-pre="60">60د</button>
+      <input id="tc" type="number" min="1" max="240" style="width:80px">
+      <button class="btn" id="tgo">ابدأ</button><button class="btn g" id="trs">إعادة</button>
+      <div class="bar"><i id="tb"></i></div>
+    </div>
+    <div class="tabs"><button class="tab" data-tab="v">🎬 الفيديوهات</button><button class="tab" data-tab="f">📂 التمارين والملفات</button></div>
+
+    <section id="pv">
+      <div class="card"><div class="row"><span class="big" id="op">0%</span><span class="mut">من وقت الدراسة</span><span class="sp"></span><span class="mut" id="ot"></span></div><div class="bar" style="margin-top:10px;height:12px"><i id="ob"></i></div></div>
+      <div class="main">
+        <div>
+          <div class="stage" id="pstage"><div class="ph" id="ph">▶ أضف فيديو للبدء</div><div class="zn l" id="zl" hidden></div><div class="zn r" id="zr" hidden></div><div class="tst" id="tst"></div></div>
+          <div class="row" id="ctl"><button class="btn g" id="cb">⏪ 10</button><button class="btn" id="cp">⏯</button><button class="btn g" id="cf">10 ⏩</button><button class="btn g" id="cs">1x</button><button class="btn g" id="cm">🔊</button><button class="btn g" id="cz">⛶</button></div>
+          <p class="mut" style="text-align:center;margin:6px 0 0">اضغط مرتين على يمين الفيديو للتقدم 10 ثوانٍ، أو على يساره للرجوع. (الأسهم ← → من الكيبورد، والمسافة للإيقاف)</p>
+        </div>
+        <div class="card"><div class="row"><input id="vu" placeholder="https://youtube.com/watch?v=..." style="flex:1" dir="ltr"><button class="btn" id="va">إضافة</button></div><div class="mut" style="margin:6px 4px" id="vc"></div><div id="vl"></div></div>
+      </div>
+    </section>
+
+    <section id="pf">
+      <div class="two"><div class="drop" id="dz"><div style="font-size:34px">📤</div><b>ارفع ملفاتك</b><div class="mut">أي صيغة: PDF، Word، PowerPoint، Excel، صور، فيديو، صوت… اسحبها هنا أو اضغط</div><input type="file" id="fi" multiple hidden></div>
+      <div class="card"><b>🔗 إضافة رابط</b><div class="row" style="margin-top:10px"><input id="lt" placeholder="العنوان (مثال: تمارين الرياضيات)" style="width:100%"><input id="lu" dir="ltr" placeholder="https://drive.google.com/…" style="flex:1"><button class="btn" id="la">إضافة</button></div><div class="mut" style="margin-top:8px">لعرض ملفات Drive هنا، اجعل مشاركتها «أي شخص لديه الرابط».</div></div></div>
+      <div class="main" style="grid-template-columns:minmax(0,1fr) minmax(0,2fr)"><div class="card" style="padding-top:6px" id="fl"></div><div id="fv"></div></div>
+    </section>
+  </div>
+  <footer>powered by <b>lititcho</b> · <a href="mailto:haithamafkir1@gmail.com">haithamafkir1@gmail.com</a> · <a href="https://www.instagram.com/lititcho/" target="_blank" rel="noopener">Instagram</a></footer>
+</div>
+<div id="ov"></div>
+<script src="script.js"></script>
+</body>
+</html>
