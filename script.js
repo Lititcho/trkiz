@@ -1,6 +1,7 @@
 const KEY='tarkeez.v1',MAXS=4,MAXV=10,STREAK_MIN=600; /* يوم الستريك = 10 دقائق تركيز */
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Africa/Algiers'}catch(e){return 'Africa/Algiers'}})();
 const NAVS=['study','progress','league','friends','shop'];
+const COIN='<svg class="ci" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cg1" x1="10" y1="6" x2="54" y2="58" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe29a"/><stop offset=".5" stop-color="#f2a03d"/><stop offset="1" stop-color="#b8661a"/></linearGradient><linearGradient id="cg2" x1="14" y1="10" x2="50" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9741c"/><stop offset="1" stop-color="#ffd37a"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#cg1)" stroke="#9a5412" stroke-width="1.5"/><circle cx="32" cy="32" r="26.5" fill="none" stroke="#fff3c4" stroke-width="1" stroke-dasharray="1.6 2.6" opacity=".85"/><circle cx="32" cy="32" r="22" fill="url(#cg2)" stroke="#9a5412" stroke-width="1"/><circle cx="32" cy="32" r="16" fill="#0b5a3c"/><circle cx="32" cy="32" r="11" fill="#fffdf8"/><circle cx="32" cy="32" r="6.5" fill="#0b5a3c"/><circle cx="32" cy="32" r="2.6" fill="#f2a03d"/><path d="M14 22a21 21 0 0 1 14-13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".55"/></svg>'; /* عملة تركيز: هدف (target) بألوان الموقع */
 /* ---- cloud (Supabase) ---- */
 const CFG=window.TRKIZ_CONFIG||{};
 const sb=(window.supabase&&CFG.url&&CFG.key&&!/PASTE/.test(CFG.url+CFG.key))?window.supabase.createClient(CFG.url,CFG.key):null;
@@ -342,7 +343,7 @@ function renderAcct(){
   const el=$('#acct');let h='';
   if(sb&&!user)h+='<button class="auth-btn" id="li"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>تسجيل الدخول</span></button>';
   if(user){
-    if(prof&&prof.coins!=null)h+=`<button class="coin" id="cn" title="عملاتك · المتجر">🪙 <b>${prof.coins}</b></button>`;
+    if(prof&&prof.coins!=null)h+=`<button class="coin" id="cn" title="عملاتك · المتجر">${COIN} <b>${prof.coins}</b></button>`;
     h+=`<button class="me" id="ma" aria-label="حسابي">${avHtml(prof)}<span class="un">${esc(dname(prof))}</span></button>`;
   }
   h+='<button class="icon" id="gear" aria-label="الإعدادات">⚙️</button>';
@@ -673,9 +674,9 @@ function toAvatar(file){return new Promise((res,rej)=>{
 function refCard(){
   if(!prof||!prof.ref_code)return'';
   const link=location.origin+location.pathname+'?ref='+prof.ref_code,n=prof.ref_count||0;
-  return`<div class="card refc"><div class="row" style="flex-wrap:nowrap"><div style="font-size:38px">🎁</div><div><h3 style="margin:0 0 4px">ادعُ أصدقاءك واربح عملات</h3><div class="mut">كل صديق يسجّل عبر رابطك: تربح <b>${REF_INV}</b> 🪙 ويربح هو <b>${REF_NEW}</b> 🪙.</div></div></div>
+  return`<div class="card refc"><div class="row" style="flex-wrap:nowrap"><div style="font-size:38px">🎁</div><div><h3 style="margin:0 0 4px">ادعُ أصدقاءك واربح عملات</h3><div class="mut">كل صديق يسجّل عبر رابطك: تربح <b>${REF_INV}</b> ${COIN} ويربح هو <b>${REF_NEW}</b> ${COIN}.</div></div></div>
     <div class="row" style="margin-top:12px"><input id="rl" readonly dir="ltr" value="${esc(link)}" style="flex:1" aria-label="رابط الإحالة" onfocus="this.select()"><button class="btn" data-copy="${esc(link)}">نسخ</button>${navigator.share?'<button class="btn g" id="rsh">مشاركة</button>':''}</div>
-    <div class="mut" style="margin-top:8px">أصدقاء دعوتهم: <b>${n}</b> · رصيدك: <b>🪙 ${prof.coins||0}</b></div></div>`;
+    <div class="mut" style="margin-top:8px">أصدقاء دعوتهم: <b>${n}</b> · رصيدك: <b>${COIN} ${prof.coins||0}</b></div></div>`;
 }
 async function claimRef(){
   const c=refPending();if(!c||!user)return;
@@ -690,7 +691,7 @@ function pageShop(){
   const el=$('#pg-shop');
   const draw=()=>{el.innerHTML=`<div class="card empty soon"><div class="em float">🛍️</div><h3 style="font-size:26px;margin:8px 0">المتجر</h3><span class="pill">قريباً · Coming Soon</span>
     <p class="mut" style="max-width:440px;margin:16px auto 0">نجهّز لك متجراً تصرف فيه عملاتك على أشياء مميزة. اجمع العملات من الآن بدعوة أصدقائك من تبويب «الأصدقاء».</p>
-    ${user&&prof&&prof.coins!=null?`<div class="bigcoin">🪙 <b>${prof.coins}</b></div>`:''}</div>`};
+    ${user&&prof&&prof.coins!=null?`<div class="bigcoin">${COIN} <b>${prof.coins}</b></div>`:''}</div>`};
   draw();
   if(user)loadProfile().then(()=>{if(S.nav==='shop'){renderAcct();draw()}});
 }

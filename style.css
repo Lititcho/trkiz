@@ -251,3 +251,7 @@ body.nos{overflow:hidden}
 .pdfp .pg{background:#fff;margin:0 0 8px;box-shadow:0 2px 10px #0003;overflow:hidden}
 .pdfp canvas{display:block}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.ci{width:1.2em;height:1.2em;vertical-align:-.22em;display:inline-block;transition:transform .5s}
+.coin:hover .ci{transform:rotateY(360deg)}
+.bigcoin .ci{width:1.5em;height:1.5em;animation:float 3s ease-in-out infinite}
