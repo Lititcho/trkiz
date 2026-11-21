@@ -255,3 +255,15 @@ body.nos{overflow:hidden}
 .ci{width:1.2em;height:1.2em;vertical-align:-.22em;display:inline-block;transition:transform .5s}
 .coin:hover .ci{transform:rotateY(360deg)}
 .bigcoin .ci{width:1.5em;height:1.5em;animation:float 3s ease-in-out infinite}
+
+/* ---------- admin + announcement ---------- */
+.ann{display:flex;gap:10px;align-items:center;background:var(--o);color:#1d2b24;font-weight:700;border-radius:18px;padding:10px 16px;margin-bottom:14px;animation:slideIn .35s ease}
+.ann span{flex:1}.ann button{background:#0002;border:0;border-radius:50%;width:26px;height:26px;cursor:pointer;color:inherit}
+.adst{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.adst b{display:block;font-size:26px;color:var(--g);font-variant-numeric:tabular-nums}
+.adl{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.adu{border:1px solid var(--line);border-radius:18px;padding:12px;background:var(--bg)}
+.tg{display:inline-block;background:var(--g);color:var(--on-g);border-radius:999px;font-size:11px;padding:1px 8px;font-weight:700}
+.tg.red{background:var(--red);color:#fff}
+.bd .tg{margin-top:4px}
+@media(max-width:820px){.adst{grid-template-columns:repeat(2,1fr)}}

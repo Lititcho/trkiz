@@ -1,6 +1,6 @@
 const KEY='tarkeez.v1',MAXS=4,MAXV=10,STREAK_MIN=600; /* يوم الستريك = 10 دقائق تركيز */
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Africa/Algiers'}catch(e){return 'Africa/Algiers'}})();
-const NAVS=['study','progress','league','friends','shop'];
+const NAVS=['study','progress','league','friends','shop','admin'];
 const COIN='<svg class="ci" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cg1" x1="10" y1="6" x2="54" y2="58" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe29a"/><stop offset=".5" stop-color="#f2a03d"/><stop offset="1" stop-color="#b8661a"/></linearGradient><linearGradient id="cg2" x1="14" y1="10" x2="50" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9741c"/><stop offset="1" stop-color="#ffd37a"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#cg1)" stroke="#9a5412" stroke-width="1.5"/><circle cx="32" cy="32" r="26.5" fill="none" stroke="#fff3c4" stroke-width="1" stroke-dasharray="1.6 2.6" opacity=".85"/><circle cx="32" cy="32" r="22" fill="url(#cg2)" stroke="#9a5412" stroke-width="1"/><circle cx="32" cy="32" r="16" fill="#0b5a3c"/><circle cx="32" cy="32" r="11" fill="#fffdf8"/><circle cx="32" cy="32" r="6.5" fill="#0b5a3c"/><circle cx="32" cy="32" r="2.6" fill="#f2a03d"/><path d="M14 22a21 21 0 0 1 14-13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".55"/></svg>'; /* عملة تركيز: هدف (target) بألوان الموقع */
 /* ---- cloud (Supabase) ---- */
 const CFG=window.TRKIZ_CONFIG||{};
@@ -42,7 +42,7 @@ function openModal(h,bind){const o=$('#ov');o.innerHTML=`<div class="modal" role
 const closeModal=()=>{const o=$('#ov'),m=o.querySelector('.modal');if(!m||m.classList.contains('out'))return;m.classList.add('out');setTimeout(()=>{if(o.querySelector('.modal.out'))o.innerHTML=''},200)};
 function confirmBox(h,ok,yes){openModal(h+`<div class="row" style="margin-top:14px"><button class="btn" id="y">${yes||'نعم'}</button><button class="btn g" id="n">إلغاء</button></div>`,()=>{$('#n').onclick=closeModal;$('#y').onclick=()=>{closeModal();ok()}})}
 function say(t){const e=document.createElement('div');e.className='say';e.innerHTML=`<div>${esc(t)}</div>`;document.body.appendChild(e);setTimeout(()=>e.remove(),3200)}
-const ERR={not_authenticated:'سجّل دخولك أولاً',already_in_team:'أنت في فريق بالفعل',not_found:'الرمز غير صحيح',team_full:'الفريق ممتلئ (30 عضواً)',bad_name:'الاسم يجب أن يكون بين 2 و40 حرفاً',challenge_ended:'انتهى هذا التحدي',challenge_full:'التحدي ممتلئ'};
+const ERR={not_authenticated:'سجّل دخولك أولاً',already_in_team:'أنت في فريق بالفعل',not_found:'الرمز غير صحيح',team_full:'الفريق ممتلئ (30 عضواً)',bad_name:'الاسم يجب أن يكون بين 2 و40 حرفاً',challenge_ended:'انتهى هذا التحدي',forbidden:'ليست لديك صلاحية',referral_off:'نظام الإحالة متوقف حالياً',bad_value:'قيمة غير صحيحة',self_action:'لا يمكنك تنفيذ هذا على حسابك',bad:'قيمة غير صحيحة',challenge_full:'التحدي ممتلئ'};
 const errMsg=e=>{const m=(e&&e.message)||'';for(const k in ERR)if(m.includes(k))return ERR[k];return 'تعذّر تنفيذ الطلب، حاول مرة أخرى'};
 
 /* ---- cloud (Supabase) ---- */
@@ -312,17 +312,19 @@ function renderNav(){
 }
 function go(n){S.nav=n;save();if(n!=='study'&&frame)cmd(frame,'pauseVideo');renderNav();renderPage()}
 function renderPage(){
-  if(S.nav==='progress')pageProgress();else if(S.nav==='league')pageLeague();else if(S.nav==='friends')pageFriends();else if(S.nav==='shop')pageShop();
+  if(S.nav==='progress')pageProgress();else if(S.nav==='league')pageLeague();else if(S.nav==='friends')pageFriends();else if(S.nav==='shop')pageShop();else if(S.nav==='admin')pageAdmin();
   renderStrip();
 }
 
 /* ---- auth ---- */
 const PROF_COLS='username,is_public,tier,display_name,avatar_url,badges,ref_code,coins,ref_count';
+const PROF_ADM=PROF_COLS+',is_admin,admin_badges,hidden_badges';
 const ANON='طالب مجهول';
 async function loadProfile(){
   if(!user)return;const id=user.id;
   try{
-    let r=await sb.from('profiles').select(PROF_COLS).eq('id',id).maybeSingle();
+    let r=await sb.from('profiles').select(PROF_ADM).eq('id',id).maybeSingle();
+    if(r.error)r=await sb.from('profiles').select(PROF_COLS).eq('id',id).maybeSingle();
     if(r.error)r=await sb.from('profiles').select('username,is_public,tier').eq('id',id).maybeSingle(); /* قبل تنفيذ ملف SQL الجديد */
     if(user&&user.id===id&&r.data)prof=r.data;
   }catch(e){}
@@ -333,7 +335,7 @@ const refPending=()=>{try{return localStorage.getItem('trkiz.ref')}catch(e){retu
 let refAsked=false;
 async function afterAuth(){
   prof=null;P=null;
-  if(user){await loadProfile();renderAcct();try{await loadProgress();syncBadges()}catch(e){}handlePendingJoin();claimRef()}
+  if(user){await loadProfile();renderAcct();await loadCustom();try{await loadProgress();syncBadges()}catch(e){}handlePendingJoin();claimRef()}
   else if(pj)say('سجّل دخولك للانضمام');
   renderAcct();renderPage();
   if(!user&&sb&&!refAsked&&refPending()){refAsked=true;say('أنشئ حساباً جديداً لتحصل على عملاتك الهدية 🎁');authModal('up')}
@@ -348,6 +350,7 @@ function renderAcct(){
   }
   h+='<button class="icon" id="gear" aria-label="الإعدادات">⚙️</button>';
   el.innerHTML=h;
+  const na=$('#navadm');if(na)na.hidden=!adm();
   if($('#li'))$('#li').onclick=()=>authModal();
   if($('#ma'))$('#ma').onclick=settings;
   if($('#cn'))$('#cn').onclick=()=>go('shop');
@@ -355,7 +358,13 @@ function renderAcct(){
 }
 /* الشارات المكتسبة تُزامَن مع الملف الشخصي ليراها الآخرون */
 const bctx=()=>({...P,refs:(prof&&prof.ref_count)||0});
-const earned=()=>P?BADGES.filter(b=>b[4](bctx())).map(b=>b[0]):[];
+let CUSTOM=[],FLAGS={};
+const allBadges=()=>BADGES.concat(CUSTOM);
+const hasBadge=(b,c)=>{const a=(prof&&prof.admin_badges)||[],h=(prof&&prof.hidden_badges)||[];return !h.includes(b[0])&&(a.includes(b[0])||b[4](c))};
+const earned=()=>P?allBadges().filter(b=>hasBadge(b,bctx())).map(b=>b[0]):[];
+async function loadCustom(){try{CUSTOM=(await rpc('list_custom_badges')||[]).map(r=>[r.id,r.emoji,r.name,r.descr||'',()=>false])}catch(e){}}
+async function loadFlags(){try{FLAGS=(await rpc('get_flags'))||{}}catch(e){FLAGS={}}renderAnn()}
+function renderAnn(){const el=$('#ann'),t=(FLAGS.announcement||'').trim();let d='';try{d=localStorage.getItem('trkiz.ann')}catch(e){}if(!t||d===t){el.hidden=true;return}el.hidden=false;el.innerHTML=`<span>📢 ${esc(t)}</span><button aria-label="إخفاء">✕</button>`;el.querySelector('button').onclick=()=>{try{localStorage.setItem('trkiz.ann',t)}catch(e){}el.hidden=true}}
 async function syncBadges(){
   if(!user||!prof||!P)return;
   const ids=earned(),old=prof.badges||[];
@@ -529,7 +538,7 @@ function renderProgress(el){
   const bs={};P.rows.filter(r=>r.day>=ws&&r.day<=shift(ws,6)).forEach(r=>bs[r.subject]=(bs[r.subject]||0)+r.seconds);
   const top=Object.entries(bs).sort((a,b)=>b[1]-a[1])[0];
   const delta=!lw?'أول أسبوع لك':tw>=lw?`+${hm(tw-lw)} عن الأسبوع الماضي`:`−${hm(lw-tw)} عن الأسبوع الماضي`;
-  const bc=bctx(),got=BADGES.filter(b=>b[4](bc)),lock=BADGES.filter(b=>!b[4](bc));
+  const bc=bctx(),got=allBadges().filter(b=>hasBadge(b,bc)),lock=allBadges().filter(b=>!hasBadge(b,bc));
   el.innerHTML=`
   <div class="two2">
     <div class="card hero">
@@ -554,8 +563,8 @@ function renderProgress(el){
     <div class="wk">${days.map(d=>`<div class="${d.v>=STREAK_MIN?'on':''} ${d.k===dayKey()?'today':''}"><i style="height:${Math.max(4,Math.round(d.v/mx*100))}%"></i><span>${WD[d.i]}</span></div>`).join('')}</div>
   </div>
   <div class="card">
-    <h3>الشارات <span class="mut">${got.length} / ${BADGES.length}</span></h3>
-    <div class="badges">${[...got,...lock].map(b=>{const g=b[4](bc);return`<div class="bd ${g?'got':'lock'}"><span class="e">${b[1]}</span><b>${esc(b[2])}</b><span class="mut">${esc(b[3])}</span></div>`}).join('')}</div>
+    <h3>الشارات <span class="mut">${got.length} / ${allBadges().length}</span></h3>
+    <div class="badges">${[...got,...lock].map(b=>{const g=hasBadge(b,bc);return`<div class="bd ${g?'got':'lock'}"><span class="e">${b[1]}</span><b>${esc(b[2])}</b><span class="mut">${esc(b[3])}</span></div>`}).join('')}</div>
   </div>`;
 }
 function renderStrip(){
@@ -653,9 +662,9 @@ async function showProfile(un,isMe){
   try{p=isMe&&prof?{...prof,badges:earned()}:await rpc('public_profile',{p_username:un})}catch(e){}
   const card=$('#ov .modal:not(.out) .card');if(!card)return;
   if(!p){card.innerHTML='<p style="text-align:center">تعذّر عرض هذا الملف (قد يكون خاصاً).</p><button class="btn g wide" id="pc">إغلاق</button>';$('#pc').onclick=closeModal;return}
-  const ids=p.badges||[],list=BADGES.filter(b=>ids.includes(b[0]));
+  const ids=p.badges||[],list=allBadges().filter(b=>ids.includes(b[0]));
   card.innerHTML=`<div class="pf">${avHtml(p,'xl')}<h3>${esc(p.display_name||p.username)}</h3><div class="mut" dir="ltr">@${esc(p.username)}</div></div>
-    <div class="mut" style="text-align:center;margin:12px 0">🏅 ${list.length} من ${BADGES.length} شارة</div>
+    <div class="mut" style="text-align:center;margin:12px 0">🏅 ${list.length} من ${allBadges().length} شارة</div>
     ${list.length?`<div class="badges pb">${list.map(b=>`<div class="bd got" title="${esc(b[3])}"><span class="e">${b[1]}</span><b>${esc(b[2])}</b></div>`).join('')}</div>`:'<p class="mut" style="text-align:center">لا توجد شارات بعد.</p>'}
     <button class="btn g wide" id="pc" style="margin-top:14px">إغلاق</button>`;
   $('#pc').onclick=closeModal;
@@ -672,9 +681,9 @@ function toAvatar(file){return new Promise((res,rej)=>{
 
 /* ---- رابط الإحالة والعملات ---- */
 function refCard(){
-  if(!prof||!prof.ref_code)return'';
+  if(!prof||!prof.ref_code||FLAGS.referral_on==='false')return'';const RI=FLAGS.ref_inviter||REF_INV,RN=FLAGS.ref_new||REF_NEW;
   const link=location.origin+location.pathname+'?ref='+prof.ref_code,n=prof.ref_count||0;
-  return`<div class="card refc"><div class="row" style="flex-wrap:nowrap"><div style="font-size:38px">🎁</div><div><h3 style="margin:0 0 4px">ادعُ أصدقاءك واربح عملات</h3><div class="mut">كل صديق يسجّل عبر رابطك: تربح <b>${REF_INV}</b> ${COIN} ويربح هو <b>${REF_NEW}</b> ${COIN}.</div></div></div>
+  return`<div class="card refc"><div class="row" style="flex-wrap:nowrap"><div style="font-size:38px">🎁</div><div><h3 style="margin:0 0 4px">ادعُ أصدقاءك واربح عملات</h3><div class="mut">كل صديق يسجّل عبر رابطك: تربح <b>${RI}</b> ${COIN} ويربح هو <b>${RN}</b> ${COIN}.</div></div></div>
     <div class="row" style="margin-top:12px"><input id="rl" readonly dir="ltr" value="${esc(link)}" style="flex:1" aria-label="رابط الإحالة" onfocus="this.select()"><button class="btn" data-copy="${esc(link)}">نسخ</button>${navigator.share?'<button class="btn g" id="rsh">مشاركة</button>':''}</div>
     <div class="mut" style="margin-top:8px">أصدقاء دعوتهم: <b>${n}</b> · رصيدك: <b>${COIN} ${prof.coins||0}</b></div></div>`;
 }
@@ -824,8 +833,108 @@ $('#la').onclick=()=>{const s=cur();let u=$('#lu').value.trim();if(!u)return;if(
 addEventListener('pagehide',()=>{flush();try{localStorage.setItem(curKey,JSON.stringify(S))}catch(e){}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
 
+/* =====================================================
+   لوحة الإدارة (تظهر لحساب الأدمن فقط · والتحقق الحقيقي في السيرفر)
+   ===================================================== */
+const adm=()=>!!(prof&&prof.is_admin);
+let adUsers=[],adBadges=[];
+function askBox(title,label,def,cb,type){
+  openModal(`<b style="font-size:19px">${esc(title)}</b><label class="fld">${esc(label)}<input id="ab" ${type==='num'?'type="number" inputmode="numeric"':''} value="${esc(def==null?'':def)}"></label><div class="msg" id="abm"></div><div class="row"><button class="btn" id="aby">تأكيد</button><button class="btn g" id="abn">إلغاء</button></div>`,()=>{
+    $('#abn').onclick=closeModal;$('#ab').focus();
+    const go=async()=>{try{await cb($('#ab').value)}catch(e){$('#abm').textContent=errMsg(e);return}closeModal()};
+    $('#aby').onclick=go;$('#ab').onkeydown=e=>{if(e.key==='Enter')go()};
+  });
+}
+async function pageAdmin(){
+  const el=$('#pg-admin');
+  if(!adm()){el.innerHTML='<div class="card empty"><div class="em">🔒</div><h3>هذه الصفحة للمشرفين فقط</h3></div>';return}
+  el.innerHTML=loadingCard;
+  let st,cb;
+  try{[st,cb]=await Promise.all([rpc('admin_stats'),rpc('list_custom_badges')])}catch(e){errCard(el,e);return}
+  adBadges=cb||[];
+  const f=FLAGS;
+  el.innerHTML=`
+  <div class="card"><h3>🛡️ لوحة الإدارة</h3>
+    <div class="adst"><div><b>${st.users}</b><span class="mut">مستخدم</span></div><div><b>${st.new_today}</b><span class="mut">جدد اليوم</span></div><div><b>${st.active_today}</b><span class="mut">نشطون اليوم</span></div><div><b>${st.hours}</b><span class="mut">ساعة تركيز</span></div></div>
+  </div>
+  <div class="card"><h3>👥 المستخدمون</h3>
+    <div class="row"><input id="aq" placeholder="ابحث باسم المستخدم أو الاسم أو الإيميل" style="flex:1"><button class="btn" id="ago">بحث</button></div>
+    <div id="au" class="adl"></div>
+  </div>
+  <div class="two2">
+    <div class="card"><h3>🏅 شارات مخصصة</h3>
+      <div id="acb">${adBadges.length?adBadges.map(b=>`<div class="item" style="cursor:default"><span class="th" style="width:40px;height:40px">${esc(b.emoji)}</span><div class="meta"><div>${esc(b.name)}</div><div class="mut">${esc(b.descr)}</div></div><button class="sm" data-del="${esc(b.id)}">🗑</button></div>`).join(''):'<div class="mut">لا توجد شارات مخصصة بعد.</div>'}</div>
+      <div class="cho"><div class="row"><input id="be" placeholder="🌟" style="width:70px;text-align:center"><input id="bn" placeholder="اسم الشارة" style="flex:1"></div>
+      <input id="bd" placeholder="الوصف (اختياري)" style="width:100%;margin-top:8px"><button class="btn wide" id="bad" style="margin-top:10px">إنشاء الشارة</button><div class="msg" id="bm"></div></div>
+    </div>
+    <div class="card"><h3>⚙️ إعدادات المنصة</h3>
+      <label class="fld">رسالة تظهر لكل المستخدمين (اتركها فارغة لإخفائها)<input id="fa" maxlength="300" value="${esc(f.announcement||'')}"></label>
+      <label class="chk"><input type="checkbox" id="fr" ${f.referral_on==='false'?'':'checked'}> تفعيل نظام الإحالة</label>
+      <div class="row"><label class="fld" style="flex:1">عملات الداعي<input id="fi" type="number" min="0" value="${esc(f.ref_inviter||50)}"></label><label class="fld" style="flex:1">عملات المدعو<input id="fn" type="number" min="0" value="${esc(f.ref_new||20)}"></label></div>
+      <button class="btn wide" id="fs">حفظ الإعدادات</button><div class="msg" id="fm"></div>
+    </div>
+  </div>`;
+  $('#ago').onclick=()=>adminSearch($('#aq').value);
+  $('#aq').onkeydown=e=>{if(e.key==='Enter')adminSearch($('#aq').value)};
+  adminSearch('');
+  $$('[data-del]',el).forEach(b=>b.onclick=()=>confirmBox('<b>حذف هذه الشارة من الجميع؟</b>',async()=>{try{await rpc('admin_delete_badge',{p_id:b.dataset.del});CUSTOM=CUSTOM.filter(x=>x[0]!==b.dataset.del);pageAdmin()}catch(e){say(errMsg(e))}},'حذف'));
+  $('#bad').onclick=async()=>{
+    const n=$('#bn').value.trim(),e=$('#be').value.trim(),m=$('#bm');
+    if(!n||!e){m.textContent='اكتب الأيقونة والاسم';return}
+    try{await rpc('admin_create_badge',{p_id:n.replace(/\s+/g,'_')+'_'+Date.now().toString(36).slice(-4),p_emoji:e,p_name:n,p_descr:$('#bd').value.trim()});await loadCustom();pageAdmin()}catch(x){m.textContent=errMsg(x)}
+  };
+  $('#fs').onclick=async()=>{
+    const m=$('#fm');
+    try{
+      await rpc('admin_set_flag',{p_key:'announcement',p_value:$('#fa').value});
+      await rpc('admin_set_flag',{p_key:'referral_on',p_value:$('#fr').checked?'true':'false'});
+      await rpc('admin_set_flag',{p_key:'ref_inviter',p_value:String($('#fi').value||0)});
+      await rpc('admin_set_flag',{p_key:'ref_new',p_value:String($('#fn').value||0)});
+      await loadFlags();m.className='msg ok';m.textContent='تم الحفظ ✓';
+    }catch(x){m.className='msg';m.textContent=errMsg(x)}
+  };
+}
+async function adminSearch(q){
+  const box=$('#au');if(!box)return;box.innerHTML='<div class="mut">جارٍ البحث…</div>';
+  try{adUsers=await rpc('admin_find_users',{p_q:q||''})}catch(e){box.innerHTML=`<div class="msg">${errMsg(e)}</div>`;return}
+  if(!adUsers.length){box.innerHTML='<div class="mut">لا نتائج.</div>';return}
+  box.innerHTML=adUsers.map((u,i)=>`<div class="adu"><div class="row">${avHtml(u)}<div class="meta"><div><b>${esc(u.display_name||u.username)}</b> <span class="mut" dir="ltr">@${esc(u.username)}</span>${u.is_admin?' <span class="tg">مشرف</span>':''}${u.banned?' <span class="tg red">محظور</span>':''}</div><div class="mut" dir="ltr" style="text-align:start">${esc(u.email||'')}</div></div></div>
+    <div class="mut" style="margin:6px 0">${COIN} ${u.coins} · ${TIERS[u.tier]?TIERS[u.tier][0]+' '+TIERS[u.tier][1]:'—'} · ⏱ ${u.minutes} د${u.bonus?` · مكافأة الدوري ${u.bonus>0?'+':''}${u.bonus}`:''}</div>
+    <div class="row"><button class="btn g s" data-a="coins" data-i="${i}">العملات</button><button class="btn g s" data-a="badges" data-i="${i}">الشارات</button><button class="btn g s" data-a="bonus" data-i="${i}">نقاط الدوري</button><button class="btn g s" data-a="tier" data-i="${i}">المستوى</button><button class="btn g s" data-a="ban" data-i="${i}">${u.banned?'رفع الحظر':'حظر'}</button></div></div>`).join('');
+  $$('[data-a]',box).forEach(b=>b.onclick=()=>adminAct(b.dataset.a,adUsers[+b.dataset.i]));
+}
+function adminAct(a,u){
+  const refresh=()=>adminSearch($('#aq')?$('#aq').value:'');
+  if(a==='coins')askBox('تعديل عملات '+u.username,'الكمية (موجب للإضافة، سالب للخصم)','0',async v=>{const n=parseInt(v,10);if(!n)throw new Error('bad');await rpc('admin_give_coins',{p_user:u.id,p_amount:n});say('تم التعديل');refresh()},'num');
+  else if(a==='bonus')askBox('نقاط الدوري لـ '+u.username,'دقائق مضافة لترتيبه هذا الأسبوع (0 للإلغاء)',u.bonus||0,async v=>{await rpc('admin_league_bonus',{p_user:u.id,p_minutes:parseInt(v,10)||0});say('تم التعديل');refresh()},'num');
+  else if(a==='ban')confirmBox(`<b>${u.banned?'رفع الحظر عن':'حظر'} ${esc(u.username)}؟</b><p class="mut">المحظور لا تُسجَّل جلساته ولا يظهر في الدوري.</p>`,async()=>{try{await rpc('admin_ban',{p_user:u.id,p_banned:!u.banned});say('تم');refresh()}catch(e){say(errMsg(e))}},'تأكيد');
+  else if(a==='tier')openModal(`<b style="font-size:19px">مستوى ${esc(u.username)}</b><p class="mut">ينقله لدوري هذا الأسبوع فوراً.</p><div class="col" style="gap:8px">${TIERS.map((t,i)=>`<button class="btn ${u.tier===i?'':'g'}" data-t="${i}">${t[0]} ${t[1]}</button>`).join('')}</div><button class="btn g wide" id="tx" style="margin-top:12px">إغلاق</button>`,()=>{
+    $('#tx').onclick=closeModal;
+    $$('[data-t]').forEach(b=>b.onclick=async()=>{try{await rpc('admin_set_tier',{p_user:u.id,p_tier:+b.dataset.t});closeModal();say('تم النقل');refresh()}catch(e){say(errMsg(e))}});
+  });
+  else if(a==='badges')adminBadges(u,refresh);
+}
+function adminBadges(u,refresh){
+  const on=b=>{const h=u.hidden_badges||[];return !h.includes(b[0])&&((u.admin_badges||[]).includes(b[0])||(u.badges||[]).includes(b[0]))};
+  const draw=()=>{
+    $('#ov .modal:not(.out) .card').innerHTML=`<b style="font-size:19px">شارات ${esc(u.username)}</b><p class="mut">اضغط الشارة لمنحها أو سحبها. «↺» يرجعها للوضع التلقائي.</p>
+      <div class="badges pb">${allBadges().map(b=>`<div class="bd ${on(b)?'got':'lock'}" data-b="${esc(b[0])}" style="cursor:pointer;position:relative"><span class="e">${b[1]}</span><b>${esc(b[2])}</b>${(u.admin_badges||[]).includes(b[0])?'<span class="tg">ممنوحة</span>':(u.hidden_badges||[]).includes(b[0])?'<span class="tg red">مسحوبة</span>':''}<button class="sm" data-r="${esc(b[0])}" style="position:absolute;top:4px;inset-inline-start:4px" title="رجوع للتلقائي">↺</button></div>`).join('')}</div>
+      <button class="btn g wide" id="bx" style="margin-top:12px">إغلاق</button>`;
+    $('#bx').onclick=()=>{closeModal();refresh()};
+    const set=async(id,mode)=>{
+      try{await rpc('admin_set_badge',{p_user:u.id,p_badge:id,p_mode:mode});
+        const a=(u.admin_badges||[]).filter(x=>x!==id),h=(u.hidden_badges||[]).filter(x=>x!==id);
+        if(mode==='give')a.push(id);if(mode==='revoke')h.push(id);
+        u.admin_badges=a;u.hidden_badges=h;draw()}catch(e){say(errMsg(e))}};
+    $$('[data-b]').forEach(t=>t.onclick=e=>{if(e.target.closest('[data-r]'))return;const b=allBadges().find(x=>x[0]===t.dataset.b);set(t.dataset.b,on(b)?'revoke':'give')});
+    $$('[data-r]').forEach(t=>t.onclick=()=>set(t.dataset.r,'reset'));
+  };
+  openModal('<div class="mut">…</div>');draw();
+}
+
 /* ---- start ---- */
 renderNav();render();renderAcct();
+if(sb)loadFlags();
 if(sb){
   sb.auth.onAuthStateChange((ev,sess)=>{
     const nu=sess?sess.user:null;
