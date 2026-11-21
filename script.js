@@ -1,6 +1,6 @@
 const KEY='tarkeez.v1',MAXS=4,MAXV=10,STREAK_MIN=600; /* يوم الستريك = 10 دقائق تركيز */
 const TZ=(()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||'Africa/Algiers'}catch(e){return 'Africa/Algiers'}})();
-const NAVS=['study','progress','league','friends','shop','admin'];
+const NAVS=['study','progress','league','friends','ai','shop','admin'];
 let COIN='<svg class="ci" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cg1" x1="10" y1="6" x2="54" y2="58" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe29a"/><stop offset=".5" stop-color="#f2a03d"/><stop offset="1" stop-color="#b8661a"/></linearGradient><linearGradient id="cg2" x1="14" y1="10" x2="50" y2="54" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9741c"/><stop offset="1" stop-color="#ffd37a"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="url(#cg1)" stroke="#9a5412" stroke-width="1.5"/><circle cx="32" cy="32" r="26.5" fill="none" stroke="#fff3c4" stroke-width="1" stroke-dasharray="1.6 2.6" opacity=".85"/><circle cx="32" cy="32" r="22" fill="url(#cg2)" stroke="#9a5412" stroke-width="1"/><circle cx="32" cy="32" r="16" fill="#0b5a3c"/><circle cx="32" cy="32" r="11" fill="#fffdf8"/><circle cx="32" cy="32" r="6.5" fill="#0b5a3c"/><circle cx="32" cy="32" r="2.6" fill="#f2a03d"/><path d="M14 22a21 21 0 0 1 14-13" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".55"/></svg>';const COIN0=COIN; /* عملة تركيز: هدف (target) بألوان الموقع */
 /* ---- cloud (Supabase) ---- */
 const CFG=window.TRKIZ_CONFIG||{};
@@ -20,7 +20,7 @@ function readState(k){
 let curKey=KEY;try{const l=sb&&localStorage.getItem(LU);if(l)curKey=ukey(l)}catch(e){}
 let S=readState(curKey);
 try{if(sb&&localStorage.getItem(LU)){const k=localStorage.getItem('trkiz.skin');if(k)document.documentElement.dataset.skin=k}}catch(e){} /* الخلفية المشتراة تظهر فوراً بدون وميض */
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),uid=()=>Math.random().toString(36).slice(2,9);
+const $=(s,r)=>(r||document).querySelector(s),$$=(s,r)=>(r||document).querySelectorAll(s),uid=()=>Math.random().toString(36).slice(2,9);
 let st=0;function save(){clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem(curKey,JSON.stringify(S))}catch(e){}},300)}
 const cur=()=>S.subs.find(s=>s.id===S.active);
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -43,7 +43,7 @@ function openModal(h,bind){const o=$('#ov');o.innerHTML=`<div class="modal" role
 const closeModal=()=>{const o=$('#ov'),m=o.querySelector('.modal');if(!m||m.classList.contains('out'))return;m.classList.add('out');setTimeout(()=>{if(o.querySelector('.modal.out'))o.innerHTML=''},200)};
 function confirmBox(h,ok,yes){openModal(h+`<div class="row" style="margin-top:14px"><button class="btn" id="y">${yes||'نعم'}</button><button class="btn g" id="n">إلغاء</button></div>`,()=>{$('#n').onclick=closeModal;$('#y').onclick=()=>{closeModal();ok()}})}
 function say(t){const e=document.createElement('div');e.className='say';e.innerHTML=`<div>${esc(t)}</div>`;document.body.appendChild(e);setTimeout(()=>e.remove(),3200)}
-const ERR={not_authenticated:'سجّل دخولك أولاً',already_in_team:'أنت في فريق بالفعل',not_found:'الرمز غير صحيح',team_full:'الفريق ممتلئ (30 عضواً)',bad_name:'الاسم يجب أن يكون بين 2 و40 حرفاً',challenge_ended:'انتهى هذا التحدي',forbidden:'ليست لديك صلاحية',not_enough_coins:'عملاتك لا تكفي',max_reached:'وصلت للحد الأقصى من هذا العنصر',not_owned:'لا تملك هذا العنصر',boost_cap:'وصلت لسقف التعزيز الأسبوعي (240 دقيقة)',referral_off:'نظام الإحالة متوقف حالياً',bad_value:'قيمة غير صحيحة',self_action:'لا يمكنك تنفيذ هذا على حسابك',bad:'قيمة غير صحيحة',challenge_full:'التحدي ممتلئ'};
+const ERR={bad_body:'النص قصير أو طويل جداً',too_fast:'مهلاً، أرسل ببطء قليلاً',banned:'حسابك محظور',not_authenticated:'سجّل دخولك أولاً',already_in_team:'أنت في فريق بالفعل',not_found:'الرمز غير صحيح',team_full:'الفريق ممتلئ (30 عضواً)',bad_name:'الاسم يجب أن يكون بين 2 و40 حرفاً',challenge_ended:'انتهى هذا التحدي',forbidden:'ليست لديك صلاحية',not_enough_coins:'عملاتك لا تكفي',max_reached:'وصلت للحد الأقصى من هذا العنصر',not_owned:'لا تملك هذا العنصر',boost_cap:'وصلت لسقف التعزيز الأسبوعي (240 دقيقة)',referral_off:'نظام الإحالة متوقف حالياً',bad_value:'قيمة غير صحيحة',self_action:'لا يمكنك تنفيذ هذا على حسابك',bad:'قيمة غير صحيحة',challenge_full:'التحدي ممتلئ'};
 const errMsg=e=>{const m=(e&&e.message)||'';for(const k in ERR)if(m.includes(k))return ERR[k];return 'تعذّر تنفيذ الطلب، حاول مرة أخرى'};
 
 /* ---- cloud (Supabase) ---- */
@@ -139,7 +139,7 @@ setInterval(()=>{
   save();upd();
 },1000);
 async function flush(){
-  if(!sb||!user||flushing||pend.sec<1||Date.now()<nextTry)return;
+  if(!sb||!user||flushing||pend.sec<1||Date.now()<nextTry||(prof&&prof.banned))return;
   const sec=pend.sec,subj=pend.subj||'عام';pend.sec=0;flushing=true;
   try{await rpc('log_session',{p_subject:subj,p_seconds:sec,p_tz:TZ});afterLog()}
   catch(e){pend.sec+=sec;nextTry=Date.now()+30000}
@@ -313,12 +313,12 @@ function renderNav(){
 }
 function go(n){S.nav=n;save();if(n!=='study'&&frame)cmd(frame,'pauseVideo');renderNav();renderPage()}
 function renderPage(){
-  if(S.nav==='progress')pageProgress();else if(S.nav==='league')pageLeague();else if(S.nav==='friends')pageFriends();else if(S.nav==='shop')pageShop();else if(S.nav==='admin')pageAdmin();
+  if(S.nav==='progress')pageProgress();else if(S.nav==='league')pageLeague();else if(S.nav==='friends')pageFriends();else if(S.nav==='shop')pageShop();else if(S.nav==='ai')pageAI();else if(S.nav==='admin')pageAdmin();
   renderStrip();
 }
 
 /* ---- auth ---- */
-const PROF_COLS='username,is_public,tier,display_name,avatar_url,badges,ref_code,coins,ref_count';
+const PROF_COLS='username,is_public,tier,display_name,avatar_url,badges,ref_code,coins,ref_count,banned';
 const PROF_ADM=PROF_COLS+',is_admin,admin_badges,hidden_badges';
 const PROF_FULL=PROF_ADM+',equipped';
 const ANON='طالب مجهول';
@@ -329,7 +329,7 @@ async function loadProfile(){
     if(r.error)r=await sb.from('profiles').select(PROF_ADM).eq('id',id).maybeSingle();
     if(r.error)r=await sb.from('profiles').select(PROF_COLS).eq('id',id).maybeSingle();
     if(r.error)r=await sb.from('profiles').select('username,is_public,tier').eq('id',id).maybeSingle(); /* قبل تنفيذ ملف SQL الجديد */
-    if(user&&user.id===id&&r.data)prof=r.data;
+    if(user&&user.id===id&&r.data){prof=r.data;checkBan()}
   }catch(e){}
 }
 const dname=p=>p?(p.display_name||p.name||p.username||''):'';
@@ -339,7 +339,7 @@ function nameHtml(p,txt){const c=eqOf(p,'color'),t=eqOf(p,'title'),ti=t&&SHOP[t]
 const refPending=()=>{try{return localStorage.getItem('trkiz.ref')}catch(e){return null}};
 let refAsked=false;
 async function afterAuth(){
-  prof=null;P=null;if(!user){INV=null;applyEquip()}
+  prof=null;P=null;checkBan();if(!user){INV=null;applyEquip()}
   if(user){await loadProfile();renderAcct();await Promise.all([loadCustom(),loadShop()]);await syncRewards(true);try{await loadProgress();syncBadges()}catch(e){}handlePendingJoin();claimRef()}
   else if(pj)say('سجّل دخولك للانضمام');
   renderAcct();renderPage();
@@ -609,7 +609,7 @@ async function pageFriends(){
   let h=refCard()+'<div class="two2"><div class="card"><h3>👥 فريقك</h3>';
   if(team){
     const goal=team.goal_hours*60,tot=team.members.reduce((a,m)=>a+m.minutes,0),p=Math.min(100,Math.round(tot/goal*100));
-    h+=`<div class="row"><b style="font-size:20px">${esc(team.name)}</b><span class="sp"></span><button class="btn g s" data-copy="${esc(inviteLink('team',team.code))}">نسخ رابط الدعوة</button></div>
+    h+=`<div class="row"><b style="font-size:20px">${esc(team.name)}</b><span class="sp"></span><button class="btn s" data-chat="team|${esc(team.code)}|${encodeURIComponent(team.name)}">💬 محادثة الفريق</button><button class="btn g s" data-copy="${esc(inviteLink('team',team.code))}">نسخ رابط الدعوة</button></div>
       <div class="mut">رمز الفريق: <b dir="ltr">${esc(team.code)}</b></div>
       <div class="row" style="margin-top:12px"><span class="big sm">${p}%</span><span class="mut">${hm(tot*60)} من ${team.goal_hours} ساعة هذا الأسبوع</span></div>
       <div class="bar tall"><i style="width:${p}%"></i></div>${board(team.members)}
@@ -620,12 +620,13 @@ async function pageFriends(){
       <div class="cho"><b>الانضمام برمز</b><div class="row" style="margin-top:8px"><input id="f-tj" dir="ltr" placeholder="الرمز" maxlength="6" style="flex:1"><button class="btn" id="f-tjb">انضمام</button></div></div>`;
   }
   h+='</div><div class="card"><h3>⚔️ تحدّي صديق</h3>';
-  if(chs.length)h+=chs.map(c=>{const over=c.ends<dayKey(new Date(Date.now()));return`<div class="cho"><div class="row"><b>${esc(c.title)}</b><span class="mut">${over?'انتهى':'ينتهي '+esc(c.ends)}</span><span class="sp"></span><button class="btn g s" data-copy="${esc(inviteLink('ch',c.code))}">نسخ الدعوة</button></div>${board(c.members)}</div>`}).join('');
+  if(chs.length)h+=chs.map(c=>{const over=c.ends<dayKey(new Date(Date.now()));return`<div class="cho"><div class="row"><b>${esc(c.title)}</b><span class="mut">${over?'انتهى':'ينتهي '+esc(c.ends)}</span><span class="sp"></span><button class="btn s" data-chat="challenge|${esc(c.code)}|${encodeURIComponent(c.title)}">💬 محادثة</button><button class="btn g s" data-copy="${esc(inviteLink('ch',c.code))}">نسخ الدعوة</button></div>${board(c.members)}</div>`}).join('');
   else h+='<p class="mut">تنافسوا في عدد دقائق التركيز خلال فترة محددة. أنشئ تحدياً وأرسل الرابط لصديقك.</p>';
   h+=`<div class="cho"><b>تحدٍّ جديد</b><div class="row" style="margin-top:8px"><input id="f-cn" placeholder="اسم التحدي" maxlength="40" style="flex:1"><select id="f-cd" aria-label="المدة"><option value="3">3 أيام</option><option value="7" selected>7 أيام</option><option value="14">14 يوماً</option></select><button class="btn" id="f-cc">إنشاء</button></div></div>
     <div class="cho"><b>الانضمام برمز</b><div class="row" style="margin-top:8px"><input id="f-cj" dir="ltr" placeholder="الرمز" maxlength="6" style="flex:1"><button class="btn" id="f-cjb">انضمام</button></div></div></div></div>`;
   el.innerHTML=h;bindProfiles(el);if($('#rsh'))$('#rsh').onclick=()=>navigator.share({title:'تركيز',text:'ذاكر معي على «تركيز» واربح عملات 🎯',url:$('#rl').value}).catch(()=>{});
   $$('[data-copy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);say('تم نسخ الرابط')}catch(e){prompt('انسخ الرابط:',b.dataset.copy)}});
+  $$('[data-chat]',el).forEach(b=>b.onclick=()=>{const [k,c,t]=b.dataset.chat.split('|');chatModal(k,c,decodeURIComponent(t||''))});
   const again=()=>pageFriends();
   if(team)$('#lv').onclick=()=>confirmBox('<b>مغادرة الفريق؟</b>',()=>act($('#lv'),async()=>{await rpc('leave_team');again()}),'غادر');
   else{
@@ -986,6 +987,7 @@ $$('[data-pre]').forEach(e=>e.onclick=()=>setTotal(+e.dataset.pre));
 $('#tc').onchange=e=>{let n=Math.round(+e.target.value);if(!(n>=1))n=1;if(n>240)n=240;setTotal(n)};
 $('#fmb').onclick=fmToggle;
 $('#tgo').onclick=()=>{
+  if(prof&&prof.banned)return;
   const s=cur(),t=s.tm;
   if(t.run){t.run=false;flush()}
   else{S.subs.forEach(x=>{if(x!==s)x.tm.run=false});flush();pend.subj=s.name;if(t.rem<=0)t.rem=t.total*60;t.run=true;lastTick=Date.now()}
@@ -1004,9 +1006,9 @@ addEventListener('keydown',e=>{
   if(e.key==='ArrowRight')seekBy(10);else if(e.key==='ArrowLeft')seekBy(-10);else if(e.key===' '||e.key==='k'){e.preventDefault();togglePlay()}
 });
 const dz=$('#dz'),fi=$('#fi');
-dz.onclick=()=>fi.click();fi.onchange=()=>{up(fi.files);fi.value=''};
+dz.onclick=()=>fi.click();fi.onchange=()=>{up([...fi.files]);fi.value=''};
 dz.ondragover=e=>{e.preventDefault();dz.classList.add('hot')};dz.ondragleave=()=>dz.classList.remove('hot');
-dz.ondrop=e=>{e.preventDefault();dz.classList.remove('hot');if(e.dataTransfer.files.length)up(e.dataTransfer.files)};
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('hot');if(e.dataTransfer.files.length)up([...e.dataTransfer.files])};
 $('#la').onclick=()=>{const s=cur();let u=$('#lu').value.trim();if(!u)return;if(!/^https?:\/\//i.test(u))u='https://'+u;
   const it={id:uid(),name:$('#lt').value.trim()||u.replace(/^https?:\/\//,'').slice(0,40),url:u};
   s.items.push(it);s.ci=it.id;$('#lt').value=$('#lu').value='';save();renderFL();showItem(s)};
@@ -1043,21 +1045,21 @@ async function pageAdmin(){
   </div>
   <div class="two2">
     <div class="card"><h3>🏅 شارات مخصصة</h3>
-      <div id="acb">${adBadges.length?adBadges.map(b=>`<div class="item" style="cursor:default"><span class="th" style="width:40px;height:40px">${esc(b.emoji)}</span><div class="meta"><div>${esc(b.name)}</div><div class="mut">${esc(b.descr)}</div></div><button class="sm" data-del="${esc(b.id)}">🗑</button></div>`).join(''):'<div class="mut">لا توجد شارات مخصصة بعد.</div>'}</div>
+      <div id="acb">${adBadges.length?adBadges.map(b=>`<div class="item" style="cursor:default"><span class="th" style="width:40px;height:40px">${esc(b.emoji)}</span><div class="meta"><div>${esc(b.name)}</div><div class="mut">${esc(b.descr)}</div></div><button class="sm" data-bdel="${esc(b.id)}">🗑</button></div>`).join(''):'<div class="mut">لا توجد شارات مخصصة بعد.</div>'}</div>
       <div class="cho"><div class="row"><input id="be" placeholder="🌟" style="width:70px;text-align:center"><input id="bn" placeholder="اسم الشارة" style="flex:1"></div>
       <input id="bd" placeholder="الوصف (اختياري)" style="width:100%;margin-top:8px"><button class="btn wide" id="bad" style="margin-top:10px">إنشاء الشارة</button><div class="msg" id="bm"></div></div>
     </div>
     <div class="card"><h3>⚙️ إعدادات المنصة</h3>
       <label class="fld">رسالة تظهر لكل المستخدمين (اتركها فارغة لإخفائها)<input id="fa" maxlength="300" value="${esc(f.announcement||'')}"></label>
       <label class="chk"><input type="checkbox" id="fr" ${f.referral_on==='false'?'':'checked'}> تفعيل نظام الإحالة</label>
-      <div class="row"><label class="fld" style="flex:1">عملات الداعي<input id="fi" type="number" min="0" value="${esc(f.ref_inviter||50)}"></label><label class="fld" style="flex:1">عملات المدعو<input id="fn" type="number" min="0" value="${esc(f.ref_new||20)}"></label></div>
+      <div class="row"><label class="fld" style="flex:1">عملات الداعي<input id="a-fi" type="number" min="0" value="${esc(f.ref_inviter||50)}"></label><label class="fld" style="flex:1">عملات المدعو<input id="a-fn" type="number" min="0" value="${esc(f.ref_new||20)}"></label></div>
       <button class="btn wide" id="fs">حفظ الإعدادات</button><div class="msg" id="fm"></div>
     </div>
   </div>`;
   $('#ago').onclick=()=>adminSearch($('#aq').value);
   $('#aq').onkeydown=e=>{if(e.key==='Enter')adminSearch($('#aq').value)};
-  adminSearch('');adminShopCard(el);
-  $$('[data-del]',el).forEach(b=>b.onclick=()=>confirmBox('<b>حذف هذه الشارة من الجميع؟</b>',async()=>{try{await rpc('admin_delete_badge',{p_id:b.dataset.del});CUSTOM=CUSTOM.filter(x=>x[0]!==b.dataset.del);pageAdmin()}catch(e){say(errMsg(e))}},'حذف'));
+  adminSearch('');adminShopCard(el);adminFeedbackCard(el);
+  $$('[data-bdel]',el).forEach(b=>b.onclick=()=>confirmBox('<b>حذف هذه الشارة من الجميع؟</b>',async()=>{try{await rpc('admin_delete_badge',{p_id:b.dataset.bdel});CUSTOM=CUSTOM.filter(x=>x[0]!==b.dataset.bdel);pageAdmin()}catch(e){say(errMsg(e))}},'حذف'));
   $('#bad').onclick=async()=>{
     const n=$('#bn').value.trim(),e=$('#be').value.trim(),m=$('#bm');
     if(!n||!e){m.textContent='اكتب الأيقونة والاسم';return}
@@ -1068,8 +1070,8 @@ async function pageAdmin(){
     try{
       await rpc('admin_set_flag',{p_key:'announcement',p_value:$('#fa').value});
       await rpc('admin_set_flag',{p_key:'referral_on',p_value:$('#fr').checked?'true':'false'});
-      await rpc('admin_set_flag',{p_key:'ref_inviter',p_value:String($('#fi').value||0)});
-      await rpc('admin_set_flag',{p_key:'ref_new',p_value:String($('#fn').value||0)});
+      await rpc('admin_set_flag',{p_key:'ref_inviter',p_value:String($('#a-fi').value||0)});
+      await rpc('admin_set_flag',{p_key:'ref_new',p_value:String($('#a-fn').value||0)});
       await loadFlags();m.className='msg ok';m.textContent='تم الحفظ ✓';
     }catch(x){m.className='msg';m.textContent=errMsg(x)}
   };
@@ -1111,6 +1113,212 @@ function adminBadges(u,refresh){
   };
   openModal('<div class="mut">…</div>');draw();
 }
+
+/* =====================================================
+   الحظر · محادثة المجموعات · الملاحظات · صفحة الذكاء الاصطناعي · مساعد الموقع
+   ===================================================== */
+
+/* ---- الحظر: شاشة تمنع الاستعمال + إيقاف المؤقت (والسيرفر يرفض التسجيل والشراء والمراسلة) ---- */
+function checkBan(){
+  const b=!!(prof&&prof.banned),o=$('#banov');
+  if(!b){if(o)o.remove();return}
+  S.subs.forEach(s=>s.tm&&(s.tm.run=false));pend.sec=0;ambSync(false);fmOff();
+  if(o)return;
+  const d=document.createElement('div');d.id='banov';
+  d.innerHTML='<div class="card"><div class="em">🚫</div><h3>حسابك محظور</h3><p class="mut">أوقفت الإدارة هذا الحساب، فلا تُسجَّل جلساتك ولا يمكنك الشراء أو المراسلة. إن كنت تظن أن هذا خطأ فراسلنا على <a href="mailto:haithamafkir1@gmail.com">haithamafkir1@gmail.com</a></p><button class="btn g wide" id="banlo">تسجيل الخروج</button></div>';
+  document.body.appendChild(d);
+  $('#banlo').onclick=async()=>{try{await sb.auth.signOut()}catch(e){}say('تم تسجيل الخروج')};
+}
+setInterval(()=>{if(user&&!document.hidden)loadProfile()},180000); /* يلتقط الحظر/رفعه أثناء فتح الموقع */
+
+/* ---- محادثة مجموعة (فريق أو تحدٍّ): أعضاء المجموعة فقط ---- */
+function chatModal(kind,code,title){
+  let last=0,timer=0,stop=false;
+  const alive=()=>!stop&&!!document.getElementById('cms');
+  const msgHtml=m=>{const t=new Date(m.ts);
+    return`<div class="cm ${m.me?'me':''}" data-mid="${m.id}">${avHtml(m)}<div class="cb"><div class="ch"><span>${nameHtml(m)}</span><span class="mut">${pad(t.getHours())}:${pad(t.getMinutes())}</span>${m.me?`<button class="cx" data-cd="${m.id}" aria-label="حذف الرسالة">✕</button>`:''}</div><div class="ct">${esc(m.body)}</div></div></div>`};
+  openModal(`<div class="chat"><div class="row"><b style="font-size:18px">💬 ${esc(title||'المحادثة')}</b><span class="sp"></span><button class="btn g s" id="chx">إغلاق</button></div>
+    <div class="mut">محادثة خاصة بأعضاء هذه المجموعة فقط. كن لطيفاً 🤝</div>
+    <div class="cmsgs" id="cms" aria-live="polite"><div class="mut ph" style="text-align:center">جارٍ التحميل…</div></div>
+    <div class="msg" id="cem"></div>
+    <div class="row" style="flex-wrap:nowrap"><input id="cin" maxlength="500" placeholder="اكتب رسالة…" autocomplete="off" aria-label="رسالة" style="flex:1;margin-top:0"><button class="btn" id="csd">إرسال</button></div></div>`,()=>{
+    async function pull(first){
+      clearTimeout(timer);
+      try{
+        const r=await rpc('chat_list',{p_kind:kind,p_code:code,p_after:last}),cm=document.getElementById('cms');
+        if(!cm)return;
+        const near=first||cm.scrollHeight-cm.scrollTop-cm.clientHeight<90;
+        if(r.length){const ph=cm.querySelector('.ph');if(ph)ph.remove();r.forEach(m=>{if(m.id>last){last=m.id;cm.insertAdjacentHTML('beforeend',msgHtml(m))}});if(near)cm.scrollTop=cm.scrollHeight}
+        else if(first)cm.innerHTML='<div class="mut ph" style="text-align:center">لا رسائل بعد. ابدأ المحادثة 👋</div>';
+        const em=$('#cem');if(em)em.textContent='';
+      }catch(e){const em=$('#cem');if(em)em.textContent=errMsg(e);if(first){const ph=document.querySelector('#cms .ph');if(ph)ph.textContent='تعذّر تحميل الرسائل'}}
+      if(alive())timer=setTimeout(pull,document.hidden?15000:4000);
+    }
+    const send=async()=>{
+      const i=$('#cin'),v=i.value.trim();if(!v)return;
+      i.value='';$('#csd').disabled=true;
+      try{await rpc('chat_send',{p_kind:kind,p_code:code,p_body:v});await pull()}
+      catch(e){const em=$('#cem');if(em)em.textContent=errMsg(e);i.value=v}
+      const sd=$('#csd');if(sd)sd.disabled=false;i.focus();
+    };
+    $('#chx').onclick=()=>{stop=true;clearTimeout(timer);closeModal()};
+    $('#csd').onclick=send;$('#cin').onkeydown=e=>{if(e.key==='Enter')send()};
+    $('#cms').onclick=async e=>{
+      const b=e.target.closest('[data-cd]');if(!b)return;
+      try{await rpc('chat_delete',{p_id:+b.dataset.cd});const el=b.closest('.cm');if(el)el.remove()}catch(x){say(errMsg(x))}
+    };
+    pull(true);$('#cin').focus();
+  });
+}
+
+/* ---- ملاحظات المستخدمين → لوحة الإدارة ---- */
+const FBK={idea:'💡 اقتراح',bug:'🐞 مشكلة',love:'❤️ إعجاب',other:'✉️ أخرى'};
+function feedbackModal(pre){
+  if(!sb){say('هذه الميزة تحتاج ربط الموقع بقاعدة البيانات');return}
+  if(!user){say('سجّل دخولك لإرسال ملاحظة');authModal();return}
+  openModal(`<b style="font-size:20px">💬 ملاحظاتك تهمّنا</b><p class="mut">اقتراح، مشكلة، سؤال، أو كلمة طيبة — تصل مباشرة إلى الإدارة.</p>
+    <label class="fld">النوع<select id="fk">${Object.entries(FBK).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+    <label class="fld">رسالتك<textarea id="fb" maxlength="1000" rows="5" placeholder="اكتب هنا…"></textarea></label>
+    <div class="msg" id="fbm"></div><div class="row"><button class="btn" id="fbs">إرسال</button><button class="btn g" id="fbc">إلغاء</button></div>`,()=>{
+    $('#fb').value=pre||'';$('#fb').focus();$('#fbc').onclick=closeModal;
+    $('#fbs').onclick=async()=>{
+      const v=$('#fb').value.trim(),m=$('#fbm');
+      if(v.length<3){m.textContent='اكتب رسالة أطول قليلاً';return}
+      $('#fbs').disabled=true;
+      try{await rpc('send_feedback',{p_kind:$('#fk').value,p_body:v,p_page:S.nav});closeModal();say('شكراً! وصلت ملاحظتك 💚')}
+      catch(e){m.textContent=errMsg(e);$('#fbs').disabled=false}
+    };
+  });
+}
+async function adminFeedbackCard(el){
+  if(!el)return;
+  el.insertAdjacentHTML('beforeend','<div class="card" id="afc"><h3>📬 الملاحظات الواردة</h3><div id="afl" class="mut">جارٍ التحميل…</div></div>');
+  const draw=async()=>{
+    const box=$('#afl');if(!box)return;
+    let rows;try{rows=await rpc('admin_list_feedback',{p_limit:100})}catch(e){box.innerHTML=`<div class="msg">${errMsg(e)} · نفّذ supabase_chat_feedback.sql</div>`;return}
+    const nw=rows.filter(r=>r.status==='new').length;
+    $('#afc h3').innerHTML='📬 الملاحظات الواردة'+(nw?` <span class="tg red">${nw} جديدة</span>`:'');
+    box.className='';
+    box.innerHTML=rows.length?rows.map(r=>`<div class="fbi ${r.status==='new'?'new':''}"><div class="row"><span class="tg">${FBK[r.kind]||FBK.other}</span><b>${esc(r.display_name||r.username||'—')}</b><span class="mut" dir="ltr">${r.username?'@'+esc(r.username):''}</span><span class="sp"></span><span class="mut">${esc(new Date(r.created_at).toLocaleString('ar'))}</span></div>
+      <div class="mut" dir="ltr" style="text-align:start">${esc(r.email||'')}${r.page?' · '+esc(r.page):''}</div>
+      <div class="fbt">${esc(r.body)}</div>
+      <div class="row">${r.status==='new'?`<button class="btn g s" data-fs="read" data-id="${r.id}">✓ تمت القراءة</button>`:''}<button class="btn g s" data-fs="delete" data-id="${r.id}">🗑 حذف</button></div></div>`).join(''):'<div class="mut">لا توجد ملاحظات بعد.</div>';
+  };
+  $('#afc').onclick=async e=>{
+    const b=e.target.closest('[data-fs]');if(!b)return;
+    b.disabled=true;try{await rpc('admin_feedback_set',{p_id:+b.dataset.id,p_status:b.dataset.fs});await draw()}catch(x){say(errMsg(x));b.disabled=false}
+  };
+  draw();
+}
+
+/* ---- صفحة الذكاء الاصطناعي: Claude · Gemini · ChatGPT (تفتح في تبويب أو نافذة جانبية) ---- */
+const AIS=[
+  {id:'claude',name:'Claude',by:'Anthropic',url:'https://claude.ai/new',q:'https://claude.ai/new?q=',
+   svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#d97757"/><g stroke="#fff" stroke-width="3.4" stroke-linecap="round"><path d="M24 9v30M9 24h30M13.4 13.4l21.2 21.2M34.6 13.4 13.4 34.6"/></g></svg>'},
+  {id:'gemini',name:'Gemini',by:'Google',url:'https://gemini.google.com/app',q:null,
+   svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="gmg" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#4285f4"/><stop offset=".55" stop-color="#9b72cb"/><stop offset="1" stop-color="#d96570"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="#eef3ff"/><path d="M24 6c1.5 10.5 7.5 16.5 18 18-10.5 1.5-16.5 7.5-18 18-1.5-10.500-7.500-16.500-18-18C16.500 22.500 22.500 16.500 24 6Z" fill="url(#gmg)"/></svg>'},
+  {id:'chatgpt',name:'ChatGPT',by:'OpenAI',url:'https://chatgpt.com/',q:'https://chatgpt.com/?q=',
+   svg:'<svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#10a37f"/><path d="M24 9.5l12.6 7.250v14.500L24 38.500 11.400 31.250v-14.500Z" fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M24 24V9.500M24 24l12.600 7.250M24 24 11.400 31.250" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>'}
+];
+let aiPick='';try{aiPick=localStorage.getItem('trkiz.ai')||''}catch(e){}
+function pageAI(){
+  const el=$('#pg-ai'),s=cur(),sj=s?'«'+s.name+'»':'مادتي';
+  const tpl=['اشرح لي ببساطة: ','لخّص لي أهم النقاط في: ',`اختبرني بـ 10 أسئلة في ${sj} ثم صحّح إجاباتي.`,`ضع لي خطة مراجعة لـ ${sj} خلال أسبوع.`,'أعطني تمارين مع الحل في: '];
+  el.innerHTML=`<div class="card"><h3>🤖 مساعدك الذكي</h3>
+    <p class="mut">اختر المساعد الذي تريده ثم افتحه. يُفتح في تبويب أو نافذة جانبية لأن هذه المواقع لا تسمح بعرضها داخل صفحة أخرى، وتحتاج حسابك عندهم (توجد خطط مجانية).</p>
+    <div class="aig">${AIS.map(a=>`<button class="aic ${aiPick===a.id?'on':''}" data-ai="${a.id}" aria-pressed="${aiPick===a.id}"><span class="aiv">${a.svg}</span><b>${a.name}</b><span class="mut">${a.by}</span></button>`).join('')}</div>
+    <div class="mut" style="margin-bottom:6px">أفكار سريعة (اختيارية):</div>
+    <div class="aip">${tpl.map((t,i)=>`<button class="chip" data-tp="${i}">${esc(t.length>30?t.slice(0,28)+'…':t)}</button>`).join('')}</div>
+    <textarea id="aiq" rows="4" placeholder="اكتب سؤالك هنا (اختياري)…"></textarea>
+    <div class="row" style="margin-top:10px"><button class="btn" id="aigo" ${aiPick?'':'disabled'}>فتح</button><button class="btn g" id="aiwin" ${aiPick?'':'disabled'}>⧉ نافذة جانبية</button><span class="mut" id="aim">${aiPick?'':'اختر مساعداً أولاً'}</span></div>
+    <p class="mut" style="margin-top:10px">يُنسخ سؤالك تلقائياً. مع Claude وChatGPT يُدرَج في المحادثة مباشرة، ومع Gemini الصقه (Ctrl+V).</p></div>`;
+  const open=pop=>{
+    const a=AIS.find(x=>x.id===aiPick);if(!a)return;
+    const q=$('#aiq').value.trim();let u=a.url;
+    if(q){try{navigator.clipboard.writeText(q)}catch(e){}if(a.q&&q.length<1500)u=a.q+encodeURIComponent(q)}
+    if(pop){const w=Math.min(480,screen.availWidth),h=Math.min(780,screen.availHeight);
+      if(!window.open(u,'ai_'+a.id,`popup=yes,width=${w},height=${h},left=${Math.max(0,screen.availWidth-w)},top=40`))say('المتصفح منع النافذة، جرّب زر «فتح»')}
+    else window.open(u,'_blank','noopener');
+    $('#aim').textContent=q?(a.q?'فُتح '+a.name+' بسؤالك':'نُسخ سؤالك: الصقه في '+a.name):'';
+  };
+  el.onclick=e=>{
+    const c=e.target.closest('[data-ai]'),t=e.target.closest('[data-tp]');
+    if(c){aiPick=c.dataset.ai;try{localStorage.setItem('trkiz.ai',aiPick)}catch(x){}
+      $$('[data-ai]',el).forEach(b=>{const on=b.dataset.ai===aiPick;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+      $('#aigo').disabled=$('#aiwin').disabled=false;$('#aim').textContent=''}
+    else if(t){const q=$('#aiq');q.value=tpl[+t.dataset.tp];q.focus();q.setSelectionRange(q.value.length,q.value.length)}
+    else if(e.target.closest('#aigo'))open(false);
+    else if(e.target.closest('#aiwin'))open(true);
+  };
+}
+
+/* ---- مساعد الموقع: أسئلة جاهزة + فهم الأسئلة المكتوبة (مجاني، بدون أي API) ---- */
+const nz=t=>String(t).toLowerCase().replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\u0621-\u064Aa-z0-9\s]/g,' ');
+const KB=[
+ {t:'ما هو تركيز وكيف أبدأ؟',k:'ابدا بدايه شرح موقع تركيز استخدام استعمال مساعده help',g:['study','اذهب للمذاكرة'],
+  a:()=>'«تركيز» موقع مجاني للمذاكرة بتركيز: مؤقت لكل مادة، فيديوهات يوتيوب، ملفاتك وتمارينك، ثم ستريك وعملات ودوري أسبوعي تتنافس فيه.\n\nللبدء: 1) أضف مادتك من الشريط أعلى «المذاكرة». 2) اختر مدة المؤقت واضغط «ابدأ». 3) أضف فيديوهات أو ملفات. 4) سجّل دخولك ليُحفظ تقدّمك وتدخل الدوري.'},
+ {t:'المواد وعددها',k:'ماده مواد اضافه اضافة حذف خانه عدد اربع زياده',a:()=>`لكل مادة مؤقتها وفيديوهاتها وملفاتها المستقلة. الحد الأساسي ${MAXS} مواد، ويمكنك زيادته حتى ${MAXS+3} بشراء «خانة مادة إضافية» من المتجر. حذف المادة يحذف كل ما فيها.`},
+ {t:'كيف يعمل المؤقت؟',k:'مؤقت تايمر وقت ساعه بومودورو دقائق ايقاف اعاده ابدا تشغيل',a:()=>'اختر 15 أو 25 أو 45 أو 60 دقيقة، أو اكتب مدة خاصة (حتى 240 دقيقة) ثم «ابدأ». يعدّ الوقت الفعلي حتى لو انتقلت لتبويب آخر، ويعمل مؤقت واحد فقط في كل مرة. عند النهاية يرنّ تنبيه. وقت التركيز يُسجَّل في حسابك إن كنت مسجّلاً.'},
+ {t:'الفيديوهات',k:'فيديو فيديوهات يوتيوب youtube رابط مشاهده سرعه تقدم',a:()=>'في تبويب «الفيديوهات» الصق رابط يوتيوب (حتى 10 فيديوهات لكل مادة). يحسب الموقع نسبة مشاهدتك وتقدّمك ويكمل من حيث توقفت. اضغط مرتين على يمين الفيديو للتقدم 10 ثوانٍ وعلى يساره للرجوع، أو استعمل الأسهم والمسافة من الكيبورد.'},
+ {t:'الملفات والتمارين',k:'ملف ملفات pdf رفع تمارين درايف drive تحميل صور ورد',a:()=>'في تبويب «التمارين والملفات» ارفع أي صيغة (PDF، Word، صور، فيديو…) أو أضف رابطاً. الملفات المرفوعة تُحفظ في متصفحك على هذا الجهاز فقط (لا تنتقل لجهاز آخر). لروابط Drive اجعل المشاركة «أي شخص لديه الرابط». عارض PDF يدعم التكبير بإصبعين وملء الشاشة.'},
+ {t:'وضع الامتحان',k:'امتحان اختبار موعد هدف ساعات امتحانات',a:()=>'اضغط «⏳ وضع الامتحان» داخل المادة، اختر تاريخ الامتحان وعدد الساعات التي تريد مذاكرتها، فيحسب لك كم دقيقة يومياً تحتاج وتتبّع تقدّمك نحو الهدف.'},
+ {t:'الستريك ودرع الحماية',k:'ستريك streak سلسله متتاليه نار درع حمايه يوم ناجح',g:['progress','تقدّمي'],a:()=>'اليوم الناجح = 10 دقائق تركيز. كل يوم ناجح متتالٍ يزيد الستريك 🔥. إن فاتك يوم واحد يحميك «درع الستريك» تلقائياً (يُشترى من المتجر بـ 120 عملة، حتى 5 دروع).'},
+ {t:'المستوى والنقاط XP',k:'مستوي xp نقاط خبره level لفل',a:()=>'كل دقيقة تركيز = نقطة XP. ترتفع المستويات تدريجياً (المستوى 2 عند 25 نقطة، ثم 100، 225…) وتظهر في صفحة «تقدّمي».'},
+ {t:'الشارات والإنجازات',k:'شارات شاره وسام انجازات badges',g:['progress','شاراتي'],a:()=>'تفتح الشارات بساعات التركيز (1، 10، 25… 1000 ساعة)، وأيام الستريك، وأيام قوية، ودعوة الأصدقاء وغيرها. تراها كلها في «تقدّمي» ويراها الآخرون في ملفك. هناك شارات حصرية تُشترى من المتجر.'},
+ {t:'كيف أربح العملات؟',k:'عملات عمله فلوس دراهم كوينز coins ربح اربح احصل',g:['shop','افتح المتجر'],a:()=>`• كل ساعة تركيز: +5\n• مكافأة يومية عند 10 دقائق: 10 + 2 لكل يوم ستريك (حتى 15) + 50 كل 7 أيام متتالية\n• إنجازات الساعات والستريك\n• الدوري: +40 عند الصعود و+100 للمركز الأول (مجموعات من 5 فأكثر)\n• دعوة صديق: +${FLAGS.ref_inviter||REF_INV}\n• صندوق المفاجأة قد يمنحك عملات`},
+ {t:'المتجر وما فيه',k:'متجر شراء اشتري اطار خلفيه لقب صندوق مفاجاه ثيم مظهر تجهيز معاينه',g:['shop','افتح المتجر'],a:()=>'في المتجر: إطارات للصورة، ألوان وألقاب للاسم، خلفيات للموقع (مع معاينة)، أصوات مطر وأمواج، نغمات تنبيه، وضع التركيز، دروع، خانات مواد، تعزيزات الدوري، شارات، وصندوق مفاجأة (150 عملة). ما اشتريته تجده في تبويب «حقيبتي» وتبدّل بينه متى شئت.'},
+ {t:'الدوري الأسبوعي',k:'دوري ترتيب منافسه اسبوعي برونزي فضي ذهبي صعود نزول ليق league',g:['league','اذهب للدوري'],a:()=>'كل أسبوع (يبدأ الأحد) تُوضع في مجموعة من حتى 30 طالباً في مستواك (برونزي ← ماسي) ويُرتَّب الجميع بدقائق التركيز الفعلية. أول 5 يصعدون، وآخر 5 ينزلون (إن كان العدد 10 فأكثر)، ومن ذاكر أقل من 10 دقائق ينزل مستوى.'},
+ {t:'المحادثة بين الأعضاء',k:'محادثه رسائل رساله شات دردشه مراسله اراسل اراسل راسل راسل ارسل اتواصل تواصل اكلم كلام chat',g:['friends','افتح الأصدقاء'],a:()=>'في صفحة «الأصدقاء» ستجد زر «💬 محادثة» داخل كل فريق وكل تحدٍّ تشارك فيه. الرسائل تظهر لأعضاء تلك المجموعة فقط، ويمكنك حذف رسائلك. للأمان: الإرسال بطيء نسبياً (5 رسائل كل 10 ثوانٍ كحد أقصى) والمحظور لا يستطيع المراسلة.'},
+ {t:'الفرق',k:'فريق فرق مجموعه هدف مشترك team انشاء رمز انضمام',g:['friends','صفحة الأصدقاء'],a:()=>'من «الأصدقاء» أنشئ فريقاً بهدف ساعات أسبوعي (حتى 30 عضواً) وشارك رابط الدعوة أو الرمز. تتجمع ساعات الجميع نحو الهدف المشترك. لكل فريق محادثة خاصة بزر 💬.'},
+ {t:'التحديات',k:'تحدي تحديات تحدي صديق challenge مبارزه',g:['friends','صفحة الأصدقاء'],a:()=>'أنشئ تحدياً (3 أو 7 أو 14 يوماً) وأرسل الرمز أو الرابط لأصدقائك، فيتنافس المشاركون على دقائق التركيز في تلك الفترة. لكل تحدٍّ محادثة خاصة بزر 💬.'},
+ {t:'الذكاء الاصطناعي',k:'ذكاء اصطناعي ai كلود جيميني جيمني شات جي بي تي chatgpt claude gemini gpt مساعد ذكي',g:['ai','افتح صفحة الذكاء'],a:()=>'في تبويب «🤖 الذكاء الاصطناعي» اختر Claude أو Gemini أو ChatGPT، واكتب سؤالك (اختياري) ثم افتحه في تبويب جديد أو نافذة جانبية. لا تُعرض داخل الموقع لأنها تمنع ذلك، وتحتاج حسابك عندها.'},
+ {t:'الحساب وتسجيل الدخول',k:'حساب تسجيل دخول خروج جوجل google بريد ايميل كلمه سر نسيت اسم مستخدم صوره ملف شخصي',a:()=>'سجّل بحساب Google أو بالبريد وكلمة سر. من ⚙️ الإعدادات تغيّر صورتك واسمك الظاهر (يمكن أن يتكرر) واسم المستخدم (فريد). نسيت كلمة السر؟ اضغط «نسيت كلمة السر؟» في نافذة الدخول.'},
+ {t:'التذكير اليومي',k:'تذكير اشعار تنبيه ينبهني يومي',a:()=>'من ⚙️ الإعدادات فعّل «ذكّرني يومياً» واختر الوقت. يعمل والموقع مفتوح (حتى في تبويب آخر) ولا يستطيع إيقاظ الجهاز والموقع مغلق.'},
+ {t:'دعوة الأصدقاء',k:'دعوه احاله صديق رابط ربح ادعو invite',g:['friends','رابط الدعوة'],a:()=>`في صفحة «الأصدقاء» ستجد رابط الإحالة الخاص بك. كل صديق يسجّل عبره: تربح ${FLAGS.ref_inviter||REF_INV} عملة ويربح هو ${FLAGS.ref_new||REF_NEW}.`},
+ {t:'بياناتي والخصوصية',k:'بيانات خصوصيه امان مزامنه جهاز اجهزه فقدت ضاعت مسح',a:()=>'تقدّمك وعملاتك وترتيبك محفوظة في حسابك السحابي. أما المواد والفيديوهات والملفات فتُحفظ في متصفحك على هذا الجهاز لكل حساب، فلا تنتقل لجهاز آخر ولا تبقى إن مسحت بيانات المتصفح.'},
+ {t:'هل الموقع مجاني؟',k:'مجاني مجانا سعر اشتراك دفع فلوس حقيقيه',a:()=>'نعم، الموقع مجاني بالكامل. العملات تُكسب بالمذاكرة فقط وليس لها قيمة مالية.'},
+ {t:'حسابي محظور / مشكلة',k:'حظر محظور حضر banned موقوف مشكله خطا عطل لا يعمل يخدم bug',g:['fb','أرسل ملاحظة'],a:()=>'إن ظهر أن حسابك محظور فراسل الإدارة على haithamafkir1@gmail.com. لأي مشكلة أخرى اضغط «أرسل ملاحظة» وصف ما حدث وسنصلحه.'},
+ {t:'اقتراح أو تواصل مع الإدارة',k:'ملاحظه ملاحظات اقتراح بلاغ اتصال تواصل ادمن ادارة feedback راي',g:['fb','أرسل ملاحظة'],a:()=>'ملاحظاتك تصلنا مباشرة في لوحة الإدارة. اضغط «أرسل ملاحظة» (أو «ملاحظات واقتراحات» أسفل الصفحة).'}
+];
+function hbAnswer(q){
+  const SW=new Set(['ما','هو','هي','كيف','كيفاش','واش','وش','في','من','على','الي','الى','عن','هل','لي','انا','نحب','ابغي','اريد','اي','ان','او','مع','هذا','هاد','شنو','وين','علاش','لماذا','متي','ممكن','نقدر','اقدر','يمكن']);
+  const nq=nz(q).trim(),toks=nq.split(/\s+/).filter(t=>t.length>1&&!SW.has(t)).map(t=>t.replace(/^(وال|لل|ال)/,''));
+  if(!toks.length)return null;
+  let best=null,bs=0;
+  KB.forEach(e=>{
+    const ws=e._w||(e._w=nz(e.k).split(/\s+/).filter(Boolean));let s=0;
+    toks.forEach(t=>ws.forEach(w=>{if(w===t)s+=3;else if(t.length>=3&&w.length>=3&&(t.includes(w)||w.includes(t)))s+=1.5}));
+    if(s>bs){bs=s;best=e}
+  });
+  return bs>=3?best:null;
+}
+function initHelp(){
+  if($('#hb'))return;
+  const b=document.createElement('button');b.id='hb';b.type='button';b.setAttribute('aria-label','مساعد الموقع');b.textContent='💬';
+  const p=document.createElement('div');p.id='hbp';p.className='hbp';p.hidden=true;p.setAttribute('role','dialog');p.setAttribute('aria-label','مساعد تركيز');
+  p.innerHTML=`<div class="hbh"><b>🎯 مساعد تركيز</b><span class="mut">اسألني عن أي شيء في الموقع</span><button type="button" id="hbx" aria-label="إغلاق">✕</button></div><div class="hbm" id="hbm" aria-live="polite"></div><div class="hbc" id="hbc">${KB.map((e,i)=>`<button class="chip" data-k="${i}">${esc(e.t)}</button>`).join('')}</div><div class="hbi"><input id="hbq" maxlength="200" placeholder="اكتب سؤالك…" aria-label="سؤالك" autocomplete="off"><button class="btn" id="hbs">إرسال</button></div>`;
+  document.body.append(b,p);
+  const m=$('#hbm'),add=(h,u)=>{const d=document.createElement('div');d.className='hbb'+(u?' u':'');d.innerHTML=h;m.appendChild(d);m.scrollTop=m.scrollHeight;return d};
+  const act2=(d,txt,fn)=>{const br=document.createElement('br'),bt=document.createElement('button');bt.className='btn s';bt.textContent=txt;bt.onclick=fn;d.append(br,bt)};
+  const hide=()=>{p.hidden=true;b.textContent='💬'};
+  const reply=e=>{const d=add(esc(e.a()).replace(/\n/g,'<br>'));
+    if(e.g)act2(d,e.g[1],()=>{hide();e.g[0]==='fb'?feedbackModal():go(e.g[0])})};
+  const ask=q=>{
+    q=q.trim();if(!q)return;add(esc(q),true);const nq=nz(q).trim();
+    if(/^(سلام|مرحبا|اهلا|هلا|السلام|hi|hello|hey)/.test(nq))setTimeout(()=>add('أهلاً بك 👋 اسألني عن أي شيء في الموقع أو اختر موضوعاً من الأسفل.'),250);
+    else if(/(شكرا|بارك|تسلم|يعطيك)/.test(nq))setTimeout(()=>add('العفو 💚 أنا هنا متى احتجت.'),250);
+    else{const e=hbAnswer(q);setTimeout(()=>{if(e)reply(e);else act2(add('لم أجد جواباً دقيقاً لسؤالك 🤔 جرّب كلمات أبسط، أو اختر موضوعاً من الأسفل، أو أرسل سؤالك للإدارة وسنجيبك.'),'📨 أرسل سؤالي للإدارة',()=>{hide();feedbackModal(q)})},350)}
+  };
+  b.onclick=()=>{p.hidden=!p.hidden;b.textContent=p.hidden?'💬':'✕';
+    if(!p.hidden){if(!m.children.length)add('أهلاً! أنا مساعد «تركيز» 👋 أشرح لك كل شيء في الموقع. اكتب سؤالك أو اختر موضوعاً من الأسفل.');$('#hbq').focus()}};
+  $('#hbx').onclick=hide;
+  $('#hbc').onclick=e=>{const c=e.target.closest('[data-k]');if(!c)return;const k=KB[+c.dataset.k];add(esc(k.t),true);setTimeout(()=>reply(k),300)};
+  $('#hbs').onclick=()=>{const i=$('#hbq');ask(i.value);i.value=''};
+  $('#hbq').onkeydown=e=>{if(e.key==='Enter'){ask(e.target.value);e.target.value=''}};
+}
+initHelp();
+$('#fbk').onclick=()=>feedbackModal();
+
 
 /* ---- start ---- */
 renderNav();render();renderAcct();
